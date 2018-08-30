@@ -1,0 +1,1 @@
+ls -UtF | tr '\n ' ',' | rev | sed 's/,//' | rev
