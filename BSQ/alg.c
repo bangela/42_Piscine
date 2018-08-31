@@ -5,22 +5,35 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 
-int** alloc_mem(int m)
+int** alloc_mem(int m, int n)
 {
 	int i;
-	char** A = (char**)malloc(m*sizeof(char *));
+	int j;
+	int **A;
+	A = (int**)malloc(m*sizeof(int *));
 	i = 0;
 
-	while (i<m);
+	while (i<n)
 	{
-		A[i] = (char*)malloc(m*sizeof(char));
+		A[i] = (int*)malloc(n*sizeof(int));
 		i++;
 	}
-	return A;
+	i = 0;
+	while (i < m)
+	{
+		j = 0;
+		while (j < n)
+		{
+			A[i][j] = 0;
+			j++;
+		}	
+		i++;
+	}
+	return (A);
 }
-
 void free_mem(char** A, int m)
 {
 	int i;
@@ -34,125 +47,115 @@ void free_mem(char** A, int m)
 	free(A);
 
 }
-
-void print(char **A, int m, int n)
+int ft_error(void)
 {
-	i=0;
-
-	while (i<m)
-	{
-		j = 0;
-		while (j<n)
-			write(1, A[i][j], 1);
-		j++;
-
-	}
-	i++;
+	ft_putstr("map error\n", 2);
+	return (-1);
 }
-void replace(char **A, int m, int n)
+int error(char *str, t_char *ch, int *fd)
 {
-	int i,j;
-	i=0;
-	while(i<m)
-	{
-		j=0;
-		while(j<n)
-		{
-			if (A[i][j]=='o' && (i!=0 || j!=0 || i!= m-1 || j!= n-1))
-				A[i][j]='-';
-			j++;
-		}
-		i++;
-	}
-	i=1;
-	while(i<m-1)
-	{
-		j=1;
-		while(j<n-1)
-			if (A[i][j-1]=='.' && A[i-1][j]=='.' && A[i][j+1]=='.' 
-						&&	A[i+1][j]=='.' && A[i][j]=='.');
-			else
-				A[i][j]='o';
-		j++;
-		i++;
-	}
-	i=0;
-	while(i<m)
-	{
-		j=0;
-		while(j<n)
-		{
-			if (A[i][j]=='-')
-				A[i][j]='X';
-			j++;
-		}
-		i++;
-	}
+	int nr;
+
+	nr = s_line(str, &(ch->row), ch, fd);
+	if (nr % (ch->row) != 0)
+		return (ft_error());
+	else ch->col = nr / (ch->row) ;
+	if ((str[ch->col] != '\n') || ((str[nr] != ch->repl) 
+				|| (str[nr] != ch->obst) || (str[nr] != ch->vid)) 
+			|| (str != NULL))
+		return(ft_error());
+	return (0);
+
 }
+void maxsq1(int **A, int M, int N, int **T)
+{
+	int i;
+	int j;
 
-/*
-void flood(char **A, int i, int j, char prev, char next) 
-{  
-	if (i < 0 || i > m-1 || j < 0 || j > n-1) 
-		return; 
-	if (A[i][j] != prev) 
-		return; 
-
-	A[i][j] = new; 
-
-	flood(A, i+1, j, prev, next); 
-	flood(A, i-1, j, prev, next); 
-	flood(A, i, j+1, prev, next); 
-	flood(A, i, j-1, prev, next); 
-} 
-
-int replace (char **A) 
-{ 
 	i = 0;
-	while (i<m)
+	while (i < M)
 	{
-		j = 0;
-		while (j<n)
-		{
-			if (A[i][j] == 'o') 
-				A[i][j] = '-'; 
-			j++;
-		}
+		T[i][0] = A[i][0]; 
 		i++;
 	}
+	j = 0; 
+	while(j < N)
+	{
+		T[0][j] = A[0][j];
+		j++;
+	}
+}
 
-i=0;
-	while(i<m)
-		if (A[i][0] == '-') 
-			flood(A, i, 0, '-', 'o'); 
-i++;
-			i=0;
-	while(i<m)
-		if (A[i][n-1] == '-') 
-			flood(A, i, n-1, '-', 'o'); 
-			i++;
-			i=0;
-	while(i<n)
-		if (A[0][i] == '-') 
-			flood(A, 0, i, '-', 'o'); 
-			i++;
-			i=0;
-	while(i<n)
-		if (A[m-1][i] == '-') 
-			flood(A, m-1, i, '-', 'o'); 
-			i++;
-i=0;
-	while(i<m)
+void maxsq2(int **A, int M, int N, int **T)
+{
+	int i;
+	int j;
+
+	i = 1; 
+	while(i < M)
+	{
+		j = 1; 
+		while(j < N)
 		{
-			j=0; 
-		while (j<n)
-		{
-			if (A[i][j] == '-') 
-				A[i][j] = 'X'; 
-				j++;
-		}
+			if( A[i][j] == 1)
+				T[i][j] = min(T[i][j-1], T[i-1][j], T[i-1][j-1]) + 1;
+			else
+				T[i][j] = 0;
+			j++;
+		} 
 		i++;
-		}
 
+	} 
+}
+t_sq maxsq3(int **A, int M, int N, int **T)
+{
+
+	int i;
+	int j;
+	t_sq t;
+
+	t.sq_s= T[0][0]; 
+	t.sq_i = 0; 
+	t.sq_j = 0;
+	i = 0; 
+	while(i < M)
+	{
+		j = 0; 
+		while(j < N)
+		{
+			if((t.sq_s) < T[i][j])
+			{
+				t.sq_s= T[i][j];
+				t.sq_i = i; 
+				t.sq_j = j;
+			}  
+			j++;      
+		}  
+		i++;
+	}
+   return (t);	
+}
+void maxsq(int **A, int M, int N, int **T)
+{
+	int i;
+	int j;
+	t_sq  t;
+
+maxsq1(A, M, N, T);
+maxsq2(A, M, N, T);
+t = maxsq3(A, M, N, T);
+
+i = t.sq_i; 
+while(i > ((t.sq_i) - (t.sq_s)))
+{
+	j = t.sq_j; 
+	while(j > ((t.sq_j) - (t.sq_s)))
+	{
+		A[i][j] = 5;
+		j--;
+	}  
+	i--;
 } 
-*/
+}
+
+
